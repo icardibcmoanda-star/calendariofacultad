@@ -13,7 +13,9 @@ import {
   isSameDay, 
   eachDayOfInterval,
   getDay,
-  isAfter
+  isAfter,
+  differenceInDays,
+  startOfToday
 } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { 
@@ -27,8 +29,8 @@ import {
   User,
   Calendar as CalendarIcon,
   List,
-  ClipboardList,
-  ExternalLink,
+  AlertCircle,
+  TrendingUp,
   Download
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
@@ -117,34 +119,49 @@ export default function CalendarPage() {
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
 
-  // Función para generar archivo ICS para Google Calendar
-  const exportToGoogle = () => {
-    alert("Generando archivo de sincronización para Google Calendar...\n\n(En un entorno real, aquí conectaríamos con la API de Google)");
-  };
+  const today = startOfToday();
+
+  // Calcular el próximo examen más cercano
+  const nextExam = useMemo(() => {
+    return EXAMS
+      .filter(e => isAfter(e.date, today) || isSameDay(e.date, today))
+      .sort((a, b) => a.date.getTime() - b.date.getTime())[0];
+  }, [today]);
+
+  const daysUntilNextExam = nextExam ? differenceInDays(nextExam.date, today) : null;
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans p-4 md:p-8">
+    <div className="min-h-screen bg-[#F8FAFC] text-slate-900 font-sans p-4 md:p-8 pb-20">
       <div className="max-w-6xl mx-auto">
         
         {/* Header Principal */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
           <div>
             <h1 className="text-3xl font-black tracking-tight text-indigo-950 flex items-center gap-3">
               IUNIR <span className="text-indigo-600">MEDICINA</span>
             </h1>
-            <p className="text-slate-500 font-medium">Cronograma Académico 5to Año • 2026</p>
+            <p className="text-slate-500 font-medium italic">"Ad astra per aspera"</p>
           </div>
-          <button 
-            onClick={exportToGoogle}
-            className="flex items-center gap-2 bg-white text-slate-700 px-5 py-2.5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all font-bold text-sm"
-          >
-            <CalendarIcon size={18} className="text-indigo-600" />
-            Sincronizar con Google
-          </button>
+          
+          {/* Widget de Próximo Examen */}
+          {nextExam && (
+            <div className="flex items-center gap-4 bg-rose-600 text-white p-4 rounded-3xl shadow-lg shadow-rose-200 animate-pulse-slow">
+              <div className="bg-white/20 p-2.5 rounded-2xl">
+                <AlertCircle size={24} />
+              </div>
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest opacity-80">Próximo Parcial</p>
+                <h4 className="font-bold text-sm leading-tight">{nextExam.name}</h4>
+                <p className="text-xs font-medium opacity-90 mt-1">
+                  {daysUntilNextExam === 0 ? "¡ES HOY! 🚀" : `Faltan ${daysUntilNextExam} días`}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Tabs de Navegación */}
-        <div className="flex gap-2 p-1.5 bg-slate-200/50 rounded-2xl mb-8 w-fit overflow-x-auto no-scrollbar">
+        <div className="flex gap-2 p-1.5 bg-slate-200/50 rounded-2xl mb-8 w-fit overflow-x-auto no-scrollbar border border-slate-200/50">
           {[
             { id: 'calendar', label: 'Calendario', icon: CalendarIcon },
             { id: 'schedule', label: 'Horarios', icon: Clock },
@@ -155,10 +172,10 @@ export default function CalendarPage() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
               className={cn(
-                "flex items-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all whitespace-nowrap",
+                "flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all whitespace-nowrap",
                 activeTab === tab.id 
-                  ? "bg-white text-indigo-600 shadow-sm" 
-                  : "text-slate-500 hover:text-slate-700"
+                  ? "bg-white text-indigo-600 shadow-sm ring-1 ring-slate-200/50" 
+                  : "text-slate-500 hover:text-indigo-500 hover:bg-white/50"
               )}
             >
               <tab.icon size={18} />
@@ -167,31 +184,30 @@ export default function CalendarPage() {
           ))}
         </div>
 
-        {/* CONTENIDO PRINCIPAL SEGÚN TAB */}
-        <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+        {/* CONTENIDO PRINCIPAL */}
+        <div className="animate-in fade-in slide-in-from-bottom-3 duration-700">
           
-          {/* TAB: CALENDARIO */}
           {activeTab === 'calendar' && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              <div className="lg:col-span-8 bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
-                <div className="p-6 flex items-center justify-between border-b border-slate-50">
-                  <h2 className="text-xl font-black capitalize text-slate-800">
+              <div className="lg:col-span-8 bg-white rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
+                <div className="p-6 flex items-center justify-between border-b border-slate-50 bg-slate-50/30">
+                  <h2 className="text-xl font-black capitalize text-slate-800 tracking-tight">
                     {format(currentDate, 'MMMM yyyy', { locale: es })}
                   </h2>
                   <div className="flex gap-2">
-                    <button onClick={prevMonth} className="p-2 hover:bg-slate-100 rounded-xl transition-colors"><ChevronLeft size={20}/></button>
-                    <button onClick={() => setCurrentDate(new Date())} className="px-4 py-2 text-xs font-bold uppercase tracking-wider hover:bg-slate-100 rounded-xl">Hoy</button>
-                    <button onClick={nextMonth} className="p-2 hover:bg-slate-100 rounded-xl transition-colors"><ChevronRight size={20}/></button>
+                    <button onClick={prevMonth} className="p-2.5 hover:bg-white hover:shadow-sm rounded-xl transition-all text-slate-500 hover:text-indigo-600 border border-transparent hover:border-slate-100"><ChevronLeft size={20}/></button>
+                    <button onClick={() => setCurrentDate(new Date(2026, 3, 13))} className="px-4 py-2 text-xs font-black uppercase tracking-widest hover:bg-white hover:shadow-sm rounded-xl transition-all border border-transparent hover:border-slate-100">Hoy</button>
+                    <button onClick={nextMonth} className="p-2.5 hover:bg-white hover:shadow-sm rounded-xl transition-all text-slate-500 hover:text-indigo-600 border border-transparent hover:border-slate-100"><ChevronRight size={20}/></button>
                   </div>
                 </div>
-                <div className="grid grid-cols-7 bg-slate-50/50 border-b border-slate-100">
+                <div className="grid grid-cols-7 bg-white border-b border-slate-50">
                   {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(d => (
-                    <div key={d} className="py-3 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">{d}</div>
+                    <div key={d} className="py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{d}</div>
                   ))}
                 </div>
-                <div className="grid grid-cols-7 auto-rows-[100px] md:auto-rows-[120px]">
+                <div className="grid grid-cols-7 auto-rows-[100px] md:auto-rows-[130px]">
                   {calendarDays.map((day, i) => {
-                    const isToday = isSameDay(day, new Date());
+                    const isToday = isSameDay(day, today);
                     const isSel = selectedDay && isSameDay(day, selectedDay);
                     const dayExams = EXAMS.filter(e => isSameDay(e.date, day));
                     const dayRotations = ROTATIONS.filter(r => isSameDay(r.date, day));
@@ -201,21 +217,23 @@ export default function CalendarPage() {
                         key={i} 
                         onClick={() => setSelectedDay(day)}
                         className={cn(
-                          "p-2 border-r border-b border-slate-50 transition-all cursor-pointer relative",
+                          "p-2 border-r border-b border-slate-50 transition-all cursor-pointer relative group",
                           !isSameMonth(day, monthStart) && "opacity-20",
-                          isSel && "bg-indigo-50/50 ring-2 ring-inset ring-indigo-200/50"
+                          isSel && "bg-indigo-50/40"
                         )}
                       >
-                        <span className={cn(
-                          "inline-flex items-center justify-center w-6 h-6 text-xs font-bold rounded-full mb-1",
-                          isToday ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200" : "text-slate-400"
-                        )}>{format(day, 'd')}</span>
-                        <div className="space-y-1">
-                          {dayExams.map((e, idx) => (
-                            <div key={idx} className="w-full h-1.5 rounded-full bg-rose-500 shadow-sm shadow-rose-200" title={e.name} />
+                        <div className="flex justify-between items-start">
+                          <span className={cn(
+                            "inline-flex items-center justify-center w-7 h-7 text-xs font-bold rounded-xl mb-1 transition-all",
+                            isToday ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100 scale-110" : "text-slate-400 group-hover:text-slate-600"
+                          )}>{format(day, 'd')}</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {dayExams.map((_, idx) => (
+                            <div key={idx} className="w-full h-1.5 rounded-full bg-rose-500 shadow-sm shadow-rose-100 animate-pulse" />
                           ))}
-                          {dayRotations.map((r, idx) => (
-                            <div key={idx} className="w-full h-1.5 rounded-full bg-amber-500 shadow-sm shadow-amber-200" title={r.name} />
+                          {dayRotations.map((_, idx) => (
+                            <div key={idx} className="w-full h-1.5 rounded-full bg-amber-400 shadow-sm shadow-amber-100" />
                           ))}
                         </div>
                       </div>
@@ -224,57 +242,64 @@ export default function CalendarPage() {
                 </div>
               </div>
               
-              {/* Detalle lateral en Calendario */}
               <div className="lg:col-span-4 space-y-6">
-                <div className="bg-white p-6 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100">
-                  <h3 className="text-lg font-black mb-4 text-indigo-950 flex items-center gap-2">
-                    <List size={20} className="text-indigo-600" /> Detalle del día
+                <div className="bg-white p-6 rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 sticky top-8">
+                  <h3 className="text-lg font-black mb-6 text-indigo-950 flex items-center gap-2">
+                    <TrendingUp size={20} className="text-indigo-600" /> Agenda del Día
                   </h3>
                   {selectedDay ? (
                     <div className="space-y-4">
-                      <p className="text-sm font-bold text-slate-500 capitalize">{format(selectedDay, "EEEE d 'de' MMMM", { locale: es })}</p>
+                      <p className="text-xs font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-lg w-fit">
+                        {format(selectedDay, "EEEE d 'de' MMMM", { locale: es })}
+                      </p>
                       
-                      {/* Exámenes del día */}
                       {EXAMS.filter(e => isSameDay(e.date, selectedDay)).map((e, idx) => (
-                        <div key={idx} className="p-4 bg-rose-50 border border-rose-100 rounded-2xl">
+                        <div key={idx} className="p-4 bg-rose-50 border border-rose-100 rounded-2xl relative overflow-hidden group">
+                          <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity"><GraduationCap size={40}/></div>
                           <span className="text-[10px] font-black uppercase text-rose-600 mb-1 block tracking-widest">Examen Parcial</span>
-                          <p className="font-bold text-rose-900">{e.name}</p>
-                          <p className="text-xs text-rose-700/70 mt-1">{e.subject}</p>
+                          <p className="font-bold text-rose-900 leading-tight">{e.name}</p>
+                          <p className="text-xs text-rose-700/70 mt-1 font-medium">{e.subject}</p>
                         </div>
                       ))}
 
-                      {/* Rotaciones del día */}
                       {ROTATIONS.filter(r => isSameDay(r.date, selectedDay)).map((r, idx) => (
-                        <div key={idx} className="p-4 bg-amber-50 border border-amber-100 rounded-2xl space-y-2">
+                        <div key={idx} className="p-4 bg-amber-50 border border-amber-100 rounded-2xl space-y-3">
                           <span className="text-[10px] font-black uppercase text-amber-600 mb-1 block tracking-widest">Rotación Clínica</span>
-                          <p className="font-bold text-amber-900">{r.name}</p>
-                          <div className="flex items-center gap-1.5 text-xs text-amber-800/70"><Clock size={12}/> {r.time}</div>
-                          <div className="flex items-center gap-1.5 text-xs text-amber-800/70"><MapPin size={12}/> {r.place}</div>
-                          <div className="flex items-center gap-1.5 text-xs text-amber-800/70"><User size={12}/> {r.docent}</div>
+                          <p className="font-bold text-amber-900 leading-tight">{r.name}</p>
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-2 text-[11px] font-bold text-amber-800/70"><Clock size={12}/> {r.time}</div>
+                            <div className="flex items-center gap-2 text-[11px] font-bold text-amber-800/70"><MapPin size={12}/> {r.place}</div>
+                            <div className="flex items-center gap-2 text-[11px] font-bold text-amber-800/70"><User size={12}/> {r.docent}</div>
+                          </div>
                         </div>
                       ))}
 
                       {EXAMS.filter(e => isSameDay(e.date, selectedDay)).length === 0 && 
                        ROTATIONS.filter(r => isSameDay(r.date, selectedDay)).length === 0 && (
-                        <p className="text-sm text-slate-400 italic py-8 text-center bg-slate-50 rounded-2xl">No hay eventos especiales este día.</p>
+                        <div className="py-12 flex flex-col items-center gap-3 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                          <BookOpen className="text-slate-300" size={32} />
+                          <p className="text-sm text-slate-400 font-bold italic tracking-tight">Sin eventos especiales</p>
+                        </div>
                       )}
                     </div>
-                  ) : <p className="text-slate-400">Selecciona un día para ver más.</p>}
+                  ) : <p className="text-slate-400">Selecciona un día.</p>}
                 </div>
               </div>
             </div>
           )}
 
-          {/* TAB: HORARIOS FIJOS */}
           {activeTab === 'schedule' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {WEEKLY_SCHEDULE.map((day, idx) => (
-                <div key={idx} className="bg-white p-6 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100">
-                  <h3 className="text-xl font-black mb-4 text-indigo-600">{day.day}</h3>
+                <div key={idx} className="bg-white p-6 rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 hover:border-indigo-100 transition-colors group">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-black text-slate-800 group-hover:text-indigo-600 transition-colors">{day.day}</h3>
+                    <div className="w-10 h-1 rounded-full bg-slate-100 group-hover:bg-indigo-100" />
+                  </div>
                   <div className="space-y-4">
                     {day.items.map((item, i) => (
-                      <div key={i} className="flex flex-col gap-1 p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{item.time}</span>
+                      <div key={i} className="flex flex-col gap-1 p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-md transition-all">
+                        <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.15em]">{item.time}</span>
                         <p className="text-sm font-bold text-slate-800 leading-tight">{item.name}</p>
                       </div>
                     ))}
@@ -284,73 +309,101 @@ export default function CalendarPage() {
             </div>
           )}
 
-          {/* TAB: EXÁMENES */}
           {activeTab === 'exams' && (
-            <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
-              <table className="w-full text-left">
-                <thead className="bg-slate-50 border-b border-slate-100">
-                  <tr>
-                    <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-slate-400">Fecha</th>
-                    <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-slate-400">Materia / Examen</th>
-                    <th className="px-6 py-4 text-xs font-black uppercase tracking-widest text-slate-400">Estado</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {EXAMS.sort((a,b) => a.date.getTime() - b.date.getTime()).map((e, idx) => {
-                    const isPast = isAfter(new Date(), e.date) && !isSameDay(new Date(), e.date);
-                    return (
-                      <tr key={idx} className={cn("hover:bg-slate-50/50 transition-colors", isPast && "opacity-40")}>
-                        <td className="px-6 py-4">
-                          <div className="flex flex-col">
-                            <span className="text-sm font-bold">{format(e.date, 'dd MMM', { locale: es })}</span>
-                            <span className="text-[10px] text-slate-400 font-bold uppercase">{format(e.date, 'EEEE', { locale: es })}</span>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <p className="text-sm font-bold text-slate-800">{e.name}</p>
-                          <p className="text-xs text-slate-400 font-medium">{e.subject}</p>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={cn(
-                            "text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-widest",
-                            isPast ? "bg-slate-100 text-slate-400" : "bg-rose-100 text-rose-600"
-                          )}>
-                            {isPast ? "Rendido" : "Pendiente"}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-slate-50/50 border-b border-slate-100">
+                    <tr>
+                      <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-slate-400">Fecha</th>
+                      <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-slate-400">Examen</th>
+                      <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-slate-400">Cuenta Regresiva</th>
+                      <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-slate-400">Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {EXAMS.sort((a,b) => a.date.getTime() - b.date.getTime()).map((e, idx) => {
+                      const isPast = isAfter(today, e.date) && !isSameDay(today, e.date);
+                      const isExamToday = isSameDay(today, e.date);
+                      const daysLeft = differenceInDays(e.date, today);
+                      
+                      return (
+                        <tr key={idx} className={cn("hover:bg-slate-50/50 transition-colors group", isPast && "opacity-40")}>
+                          <td className="px-8 py-5">
+                            <div className="flex flex-col">
+                              <span className="text-sm font-black text-slate-800">{format(e.date, 'dd MMM', { locale: es })}</span>
+                              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{format(e.date, 'EEEE', { locale: es })}</span>
+                            </div>
+                          </td>
+                          <td className="px-8 py-5">
+                            <p className="text-sm font-black text-indigo-950">{e.name}</p>
+                            <p className="text-xs text-slate-400 font-bold uppercase tracking-tighter mt-0.5">{e.subject}</p>
+                          </td>
+                          <td className="px-8 py-5">
+                            {isPast ? (
+                              <span className="text-xs font-bold text-slate-300">-</span>
+                            ) : (
+                              <div className={cn(
+                                "flex items-center gap-2 text-xs font-black px-4 py-2 rounded-2xl border w-fit",
+                                isExamToday ? "bg-rose-600 text-white border-rose-600" : 
+                                daysLeft <= 7 ? "bg-amber-50 text-amber-600 border-amber-100" : "bg-indigo-50 text-indigo-600 border-indigo-100"
+                              )}>
+                                {isExamToday ? "¡ES HOY!" : `Faltan ${daysLeft} días`}
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-8 py-5">
+                            <span className={cn(
+                              "text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-widest",
+                              isPast ? "bg-slate-100 text-slate-400" : isExamToday ? "bg-rose-100 text-rose-600" : "bg-emerald-100 text-emerald-600"
+                            )}>
+                              {isPast ? "Rendido" : isExamToday ? "Hoy" : "Pendiente"}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
 
-          {/* TAB: ROTACIONES */}
           {activeTab === 'rotations' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {ROTATIONS.sort((a,b) => a.date.getTime() - b.date.getTime()).map((r, idx) => (
-                <div key={idx} className="bg-white p-6 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 flex gap-4">
-                  <div className="flex flex-col items-center justify-center bg-amber-50 text-amber-600 w-16 h-16 rounded-2xl shrink-0 border border-amber-100">
-                    <span className="text-lg font-black leading-none">{format(r.date, 'dd')}</span>
-                    <span className="text-[10px] font-black uppercase">{format(r.date, 'MMM')}</span>
-                  </div>
-                  <div className="flex-1 space-y-2">
-                    <div className="flex justify-between items-start">
-                      <h3 className="font-bold text-slate-800 text-lg">{r.name}</h3>
-                      <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100">{r.time}</span>
+              {ROTATIONS.sort((a,b) => a.date.getTime() - b.date.getTime()).map((r, idx) => {
+                const isPast = isAfter(today, r.date) && !isSameDay(today, r.date);
+                return (
+                  <div key={idx} className={cn(
+                    "bg-white p-6 rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 flex gap-6 group hover:border-amber-200 transition-all",
+                    isPast && "opacity-50"
+                  )}>
+                    <div className="flex flex-col items-center justify-center bg-amber-50 text-amber-600 w-20 h-20 rounded-[2rem] shrink-0 border border-amber-100 group-hover:scale-105 transition-transform">
+                      <span className="text-xl font-black leading-none">{format(r.date, 'dd')}</span>
+                      <span className="text-[10px] font-black uppercase tracking-tighter">{format(r.date, 'MMM')}</span>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-500">
-                      <div className="flex items-center gap-1.5"><MapPin size={14} className="text-amber-500" /> {r.place}</div>
-                      <div className="flex items-center gap-1.5"><User size={14} className="text-indigo-400" /> {r.docent}</div>
+                    <div className="flex-1 space-y-3">
+                      <div className="flex justify-between items-start">
+                        <h3 className="font-black text-indigo-950 text-lg leading-tight">{r.name}</h3>
+                        {!isPast && <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-100">{r.time}</span>}
+                      </div>
+                      <div className="grid grid-cols-1 gap-2">
+                        <div className="flex items-center gap-2 text-xs font-bold text-slate-500"><MapPin size={14} className="text-amber-500" /> {r.place}</div>
+                        <div className="flex items-center gap-2 text-xs font-bold text-slate-500"><User size={14} className="text-indigo-400" /> {r.docent}</div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
 
         </div>
+      </div>
+
+      {/* Footer / Brand */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-md px-6 py-3 rounded-full border border-slate-200 shadow-lg z-50">
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">IUNIR Medicina • 5to Año • 2026</p>
       </div>
     </div>
   );
