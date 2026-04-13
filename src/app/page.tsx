@@ -89,22 +89,61 @@ const ROTATIONS = [
 ];
 
 const EXAMS = [
-  { date: new Date(2026, 4, 13), name: '1° Parcial Reumatología', subject: 'Medicina Interna II' },
-  { date: new Date(2026, 4, 19), name: '2° Parcial Hematología', subject: 'Medicina Interna II' },
-  { date: new Date(2026, 4, 8), name: '1° Parcial Clínica Quirúrgica', subject: 'Clínica Quirúrgica II' },
-  { date: new Date(2026, 4, 15), name: '1° Parcial Cibernética', subject: 'Cibernética V' },
-  { date: new Date(2026, 4, 21), name: '1° Parcial PH V', subject: 'PH V' },
-  { date: new Date(2026, 4, 26), name: '1° Parcial Tocoginecología', subject: 'Tocoginecología' },
-  { date: new Date(2026, 4, 29), name: '1° Parcial Inglés V', subject: 'Inglés V' },
-  { date: new Date(2026, 4, 4), name: '1° Parcial Humanística', subject: 'Humanística V' },
-  { date: new Date(2026, 5, 2), name: '1° Parcial Pediatría', subject: 'Pediatría y Neonatología' },
-  { date: new Date(2026, 5, 5), name: '1° Parcial Cirugía Básica', subject: 'Cirugía Básica V' },
-  { date: new Date(2026, 5, 10), name: '1° Parcial Diagnóstico Imágenes', subject: 'Diagnóstico por Imágenes V' },
-  { date: new Date(2026, 5, 12), name: '2° Parcial Cibernética', subject: 'Cibernética V' },
-  { date: new Date(2026, 5, 16), name: '1° Parcial Italiano V', subject: 'Italiano V' },
-  { date: new Date(2026, 5, 18), name: '2° Parcial PH V', subject: 'PH V' },
-  { date: new Date(2026, 5, 22), name: '2° Parcial Humanística', subject: 'Humanística V' },
-  { date: new Date(2026, 5, 26), name: '2° Parcial Clínica Quirúrgica', subject: 'Clínica Quirúrgica II' },
+  // Medicina Interna II
+  { date: new Date(2026, 4, 13), name: '1° Parcial (Reumatología)', subject: 'Medicina Interna II' },
+  { date: new Date(2026, 4, 19), name: '2° Parcial (Hematología)', subject: 'Medicina Interna II' },
+  { date: new Date(2026, 6, 30), name: '3° Parcial (Toxicología)', subject: 'Medicina Interna II' },
+  { date: new Date(2026, 7, 12), name: '4° Parcial (Med. Familiar)', subject: 'Medicina Interna II' },
+  { date: new Date(2026, 9, 8), name: '5° Parcial (Med. Crítica)', subject: 'Medicina Interna II' },
+  
+  // Clínica Quirúrgica II
+  { date: new Date(2026, 4, 8), name: '1° Parcial', subject: 'Clínica Quirúrgica II' },
+  { date: new Date(2026, 5, 26), name: '2° Parcial', subject: 'Clínica Quirúrgica II' },
+  { date: new Date(2026, 8, 11), name: '3° Parcial', subject: 'Clínica Quirúrgica II' },
+  { date: new Date(2026, 10, 6), name: '4° Parcial', subject: 'Clínica Quirúrgica II' },
+
+  // PH V
+  { date: new Date(2026, 4, 21), name: '1° Parcial', subject: 'PH V' },
+  { date: new Date(2026, 5, 18), name: '2° Parcial', subject: 'PH V' },
+
+  // Praxis Médica y Legal
+  { date: new Date(2026, 8, 15), name: '1° Parcial', subject: 'Praxis Médica y Legal' },
+  { date: new Date(2026, 10, 10), name: '2° Parcial', subject: 'Praxis Médica y Legal' },
+
+  // Cibernética V
+  { date: new Date(2026, 4, 15), name: '1° Parcial', subject: 'Cibernética V' },
+  { date: new Date(2026, 5, 12), name: '2° Parcial', subject: 'Cibernética V' },
+
+  // Cirugía Básica V
+  { date: new Date(2026, 5, 5), name: '1° Parcial', subject: 'Cirugía Básica V' },
+  { date: new Date(2026, 9, 23), name: '2° Parcial', subject: 'Cirugía Básica V' },
+
+  // Inglés V
+  { date: new Date(2026, 3, 29), name: '1° Parcial (A-B-C)', subject: 'Inglés V' },
+  { date: new Date(2026, 7, 5), name: '2° Parcial (A-B-C)', subject: 'Inglés V' },
+  { date: new Date(2026, 9, 28), name: '3° Parcial (A-B-C)', subject: 'Inglés V' },
+
+  // Italiano V
+  { date: new Date(2026, 5, 16), name: '1° Parcial (A-B)', subject: 'Italiano V' },
+  { date: new Date(2026, 9, 27), name: '2° Parcial (A-B)', subject: 'Italiano V' },
+
+  // Tocoginecología
+  { date: new Date(2026, 4, 26), name: '1° Parcial', subject: 'Tocoginecología' },
+  { date: new Date(2026, 6, 2), name: '2° Parcial', subject: 'Tocoginecología' },
+  { date: new Date(2026, 8, 29), name: '3° Parcial', subject: 'Tocoginecología' },
+
+  // Pediatría y Neonatología
+  { date: new Date(2026, 5, 2), name: '1° Parcial', subject: 'Pediatría y Neonatología' },
+  { date: new Date(2026, 8, 9), name: '2° Parcial', subject: 'Pediatría y Neonatología' },
+  { date: new Date(2026, 10, 3), name: '3° Parcial', subject: 'Pediatría y Neonatología' },
+
+  // Humanística V
+  { date: new Date(2026, 4, 4), name: '1° Parcial', subject: 'Humanística V' },
+  { date: new Date(2026, 5, 22), name: '2° Parcial', subject: 'Humanística V' },
+
+  // Diagnóstico por Imágenes V
+  { date: new Date(2026, 5, 10), name: '1° Parcial', subject: 'Diagnóstico por Imágenes V' },
+  { date: new Date(2026, 9, 21), name: '2° Parcial', subject: 'Diagnóstico por Imágenes V' },
 ];
 
 // Ayudante para generar links de Google Calendar
@@ -112,7 +151,7 @@ const getGoogleCalendarLink = (event: any) => {
   const base = "https://calendar.google.com/calendar/render?action=TEMPLATE";
   const startStr = format(event.date, "yyyyMMdd");
   const endStr = format(addHours(event.date, 1), "yyyyMMdd");
-  const text = encodeURIComponent(event.name);
+  const text = encodeURIComponent(`${event.subject ? event.subject + ': ' : ''}${event.name}`);
   const details = encodeURIComponent(`${event.subject || ''} ${event.docent || ''} ${event.place || ''}`.trim());
   const location = encodeURIComponent(event.place || "IUNIR");
   return `${base}&text=${text}&dates=${startStr}/${endStr}&details=${details}&location=${location}`;
