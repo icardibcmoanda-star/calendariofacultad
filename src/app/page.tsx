@@ -15,7 +15,8 @@ import {
   getDay,
   isAfter,
   differenceInDays,
-  startOfToday
+  startOfToday,
+  addHours
 } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { 
@@ -31,7 +32,8 @@ import {
   List,
   AlertCircle,
   TrendingUp,
-  Download
+  Share2,
+  Plus
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -105,6 +107,17 @@ const EXAMS = [
   { date: new Date(2026, 5, 26), name: '2° Parcial Clínica Quirúrgica', subject: 'Clínica Quirúrgica II' },
 ];
 
+// Ayudante para generar links de Google Calendar
+const getGoogleCalendarLink = (event: any) => {
+  const base = "https://calendar.google.com/calendar/render?action=TEMPLATE";
+  const startStr = format(event.date, "yyyyMMdd");
+  const endStr = format(addHours(event.date, 1), "yyyyMMdd");
+  const text = encodeURIComponent(event.name);
+  const details = encodeURIComponent(`${event.subject || ''} ${event.docent || ''} ${event.place || ''}`.trim());
+  const location = encodeURIComponent(event.place || "IUNIR");
+  return `${base}&text=${text}&dates=${startStr}/${endStr}&details=${details}&location=${location}`;
+};
+
 export default function CalendarPage() {
   const [activeTab, setActiveTab] = useState<'calendar' | 'schedule' | 'exams' | 'rotations'>('calendar');
   const [currentDate, setCurrentDate] = useState(new Date(2026, 3, 13));
@@ -116,12 +129,8 @@ export default function CalendarPage() {
   const endDate = endOfWeek(monthEnd, { weekStartsOn: 1 });
   const calendarDays = eachDayOfInterval({ start: startDate, end: endDate });
 
-  const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
-  const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
-
   const today = startOfToday();
 
-  // Calcular el próximo examen más cercano
   const nextExam = useMemo(() => {
     return EXAMS
       .filter(e => isAfter(e.date, today) || isSameDay(e.date, today))
@@ -140,19 +149,18 @@ export default function CalendarPage() {
             <h1 className="text-3xl font-black tracking-tight text-indigo-950 flex items-center gap-3">
               IUNIR <span className="text-indigo-600">MEDICINA</span>
             </h1>
-            <p className="text-slate-500 font-medium italic">"Ad astra per aspera"</p>
+            <p className="text-slate-500 font-medium italic">Sincronizado con Google Calendar</p>
           </div>
           
-          {/* Widget de Próximo Examen */}
           {nextExam && (
-            <div className="flex items-center gap-4 bg-rose-600 text-white p-4 rounded-3xl shadow-lg shadow-rose-200 animate-pulse-slow">
+            <div className="flex items-center gap-4 bg-rose-600 text-white p-4 rounded-3xl shadow-lg shadow-rose-200 border-2 border-white/20">
               <div className="bg-white/20 p-2.5 rounded-2xl">
                 <AlertCircle size={24} />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest opacity-80">Próximo Parcial</p>
+                <p className="text-[10px] font-black uppercase tracking-widest opacity-80 leading-none mb-1">Próximo Parcial</p>
                 <h4 className="font-bold text-sm leading-tight">{nextExam.name}</h4>
-                <p className="text-xs font-medium opacity-90 mt-1">
+                <p className="text-xs font-black bg-white/20 px-2 py-0.5 rounded-lg mt-1 inline-block">
                   {daysUntilNextExam === 0 ? "¡ES HOY! 🚀" : `Faltan ${daysUntilNextExam} días`}
                 </p>
               </div>
@@ -160,7 +168,7 @@ export default function CalendarPage() {
           )}
         </div>
 
-        {/* Tabs de Navegación */}
+        {/* Tabs */}
         <div className="flex gap-2 p-1.5 bg-slate-200/50 rounded-2xl mb-8 w-fit overflow-x-auto no-scrollbar border border-slate-200/50">
           {[
             { id: 'calendar', label: 'Calendario', icon: CalendarIcon },
@@ -184,20 +192,18 @@ export default function CalendarPage() {
           ))}
         </div>
 
-        {/* CONTENIDO PRINCIPAL */}
+        {/* CONTENIDO */}
         <div className="animate-in fade-in slide-in-from-bottom-3 duration-700">
           
           {activeTab === 'calendar' && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               <div className="lg:col-span-8 bg-white rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
                 <div className="p-6 flex items-center justify-between border-b border-slate-50 bg-slate-50/30">
-                  <h2 className="text-xl font-black capitalize text-slate-800 tracking-tight">
-                    {format(currentDate, 'MMMM yyyy', { locale: es })}
-                  </h2>
+                  <h2 className="text-xl font-black capitalize text-slate-800">{format(currentDate, 'MMMM yyyy', { locale: es })}</h2>
                   <div className="flex gap-2">
-                    <button onClick={prevMonth} className="p-2.5 hover:bg-white hover:shadow-sm rounded-xl transition-all text-slate-500 hover:text-indigo-600 border border-transparent hover:border-slate-100"><ChevronLeft size={20}/></button>
-                    <button onClick={() => setCurrentDate(new Date(2026, 3, 13))} className="px-4 py-2 text-xs font-black uppercase tracking-widest hover:bg-white hover:shadow-sm rounded-xl transition-all border border-transparent hover:border-slate-100">Hoy</button>
-                    <button onClick={nextMonth} className="p-2.5 hover:bg-white hover:shadow-sm rounded-xl transition-all text-slate-500 hover:text-indigo-600 border border-transparent hover:border-slate-100"><ChevronRight size={20}/></button>
+                    <button onClick={() => setCurrentDate(subMonths(currentDate, 1))} className="p-2.5 hover:bg-white rounded-xl text-slate-500 transition-all border border-transparent hover:border-slate-100"><ChevronLeft size={20}/></button>
+                    <button onClick={() => setCurrentDate(new Date(2026, 3, 13))} className="px-4 py-2 text-xs font-black uppercase tracking-widest hover:bg-white rounded-xl border border-transparent hover:border-slate-100">Hoy</button>
+                    <button onClick={() => setCurrentDate(addMonths(currentDate, 1))} className="p-2.5 hover:bg-white rounded-xl text-slate-500 transition-all border border-transparent hover:border-slate-100"><ChevronRight size={20}/></button>
                   </div>
                 </div>
                 <div className="grid grid-cols-7 bg-white border-b border-slate-50">
@@ -217,24 +223,18 @@ export default function CalendarPage() {
                         key={i} 
                         onClick={() => setSelectedDay(day)}
                         className={cn(
-                          "p-2 border-r border-b border-slate-50 transition-all cursor-pointer relative group",
+                          "p-2 border-r border-b border-slate-50 transition-all cursor-pointer relative",
                           !isSameMonth(day, monthStart) && "opacity-20",
                           isSel && "bg-indigo-50/40"
                         )}
                       >
-                        <div className="flex justify-between items-start">
-                          <span className={cn(
-                            "inline-flex items-center justify-center w-7 h-7 text-xs font-bold rounded-xl mb-1 transition-all",
-                            isToday ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100 scale-110" : "text-slate-400 group-hover:text-slate-600"
-                          )}>{format(day, 'd')}</span>
-                        </div>
+                        <span className={cn(
+                          "inline-flex items-center justify-center w-7 h-7 text-xs font-bold rounded-xl mb-1 transition-all",
+                          isToday ? "bg-indigo-600 text-white shadow-lg" : "text-slate-400"
+                        )}>{format(day, 'd')}</span>
                         <div className="flex flex-wrap gap-1 mt-1">
-                          {dayExams.map((_, idx) => (
-                            <div key={idx} className="w-full h-1.5 rounded-full bg-rose-500 shadow-sm shadow-rose-100 animate-pulse" />
-                          ))}
-                          {dayRotations.map((_, idx) => (
-                            <div key={idx} className="w-full h-1.5 rounded-full bg-amber-400 shadow-sm shadow-amber-100" />
-                          ))}
+                          {dayExams.map((_, idx) => <div key={idx} className="w-full h-1.5 rounded-full bg-rose-500 animate-pulse" />)}
+                          {dayRotations.map((_, idx) => <div key={idx} className="w-full h-1.5 rounded-full bg-amber-400" />)}
                         </div>
                       </div>
                     );
@@ -243,42 +243,55 @@ export default function CalendarPage() {
               </div>
               
               <div className="lg:col-span-4 space-y-6">
-                <div className="bg-white p-6 rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 sticky top-8">
-                  <h3 className="text-lg font-black mb-6 text-indigo-950 flex items-center gap-2">
-                    <TrendingUp size={20} className="text-indigo-600" /> Agenda del Día
-                  </h3>
+                <div className="bg-white p-6 rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100">
+                  <h3 className="text-lg font-black mb-6 text-indigo-950 flex items-center gap-2"><TrendingUp size={20} className="text-indigo-600" /> Agenda</h3>
                   {selectedDay ? (
                     <div className="space-y-4">
-                      <p className="text-xs font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-lg w-fit">
-                        {format(selectedDay, "EEEE d 'de' MMMM", { locale: es })}
-                      </p>
+                      <p className="text-xs font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-lg w-fit">{format(selectedDay, "EEEE d 'de' MMMM", { locale: es })}</p>
                       
                       {EXAMS.filter(e => isSameDay(e.date, selectedDay)).map((e, idx) => (
-                        <div key={idx} className="p-4 bg-rose-50 border border-rose-100 rounded-2xl relative overflow-hidden group">
-                          <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity"><GraduationCap size={40}/></div>
-                          <span className="text-[10px] font-black uppercase text-rose-600 mb-1 block tracking-widest">Examen Parcial</span>
+                        <div key={idx} className="p-4 bg-rose-50 border border-rose-100 rounded-2xl">
+                          <div className="flex justify-between items-start mb-2">
+                            <span className="text-[10px] font-black uppercase text-rose-600 tracking-widest">Parcial</span>
+                            <a 
+                              href={getGoogleCalendarLink(e)} 
+                              target="_blank" 
+                              className="p-1.5 bg-white text-rose-600 rounded-lg shadow-sm border border-rose-100 hover:scale-110 transition-transform"
+                              title="Añadir a Google Calendar"
+                            >
+                              <Plus size={14} />
+                            </a>
+                          </div>
                           <p className="font-bold text-rose-900 leading-tight">{e.name}</p>
-                          <p className="text-xs text-rose-700/70 mt-1 font-medium">{e.subject}</p>
+                          <p className="text-[11px] text-rose-700/70 mt-1 font-bold">{e.subject}</p>
                         </div>
                       ))}
 
                       {ROTATIONS.filter(r => isSameDay(r.date, selectedDay)).map((r, idx) => (
-                        <div key={idx} className="p-4 bg-amber-50 border border-amber-100 rounded-2xl space-y-3">
-                          <span className="text-[10px] font-black uppercase text-amber-600 mb-1 block tracking-widest">Rotación Clínica</span>
+                        <div key={idx} className="p-4 bg-amber-50 border border-amber-100 rounded-2xl">
+                          <div className="flex justify-between items-start mb-2">
+                            <span className="text-[10px] font-black uppercase text-amber-600 tracking-widest">Rotación</span>
+                            <a 
+                              href={getGoogleCalendarLink(r)} 
+                              target="_blank" 
+                              className="p-1.5 bg-white text-amber-600 rounded-lg shadow-sm border border-amber-100 hover:scale-110 transition-transform"
+                            >
+                              <Plus size={14} />
+                            </a>
+                          </div>
                           <p className="font-bold text-amber-900 leading-tight">{r.name}</p>
-                          <div className="space-y-1.5">
-                            <div className="flex items-center gap-2 text-[11px] font-bold text-amber-800/70"><Clock size={12}/> {r.time}</div>
-                            <div className="flex items-center gap-2 text-[11px] font-bold text-amber-800/70"><MapPin size={12}/> {r.place}</div>
-                            <div className="flex items-center gap-2 text-[11px] font-bold text-amber-800/70"><User size={12}/> {r.docent}</div>
+                          <div className="mt-2 space-y-1">
+                            <div className="flex items-center gap-2 text-[10px] font-bold text-amber-800/60"><Clock size={12}/> {r.time}</div>
+                            <div className="flex items-center gap-2 text-[10px] font-bold text-amber-800/60"><MapPin size={12}/> {r.place}</div>
                           </div>
                         </div>
                       ))}
 
                       {EXAMS.filter(e => isSameDay(e.date, selectedDay)).length === 0 && 
                        ROTATIONS.filter(r => isSameDay(r.date, selectedDay)).length === 0 && (
-                        <div className="py-12 flex flex-col items-center gap-3 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                          <BookOpen className="text-slate-300" size={32} />
-                          <p className="text-sm text-slate-400 font-bold italic tracking-tight">Sin eventos especiales</p>
+                        <div className="py-12 flex flex-col items-center gap-2 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                          <BookOpen className="text-slate-300" size={24} />
+                          <p className="text-xs text-slate-400 font-bold italic">Día libre de eventos</p>
                         </div>
                       )}
                     </div>
@@ -291,15 +304,12 @@ export default function CalendarPage() {
           {activeTab === 'schedule' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {WEEKLY_SCHEDULE.map((day, idx) => (
-                <div key={idx} className="bg-white p-6 rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 hover:border-indigo-100 transition-colors group">
-                  <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-black text-slate-800 group-hover:text-indigo-600 transition-colors">{day.day}</h3>
-                    <div className="w-10 h-1 rounded-full bg-slate-100 group-hover:bg-indigo-100" />
-                  </div>
-                  <div className="space-y-4">
+                <div key={idx} className="bg-white p-6 rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 group">
+                  <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center justify-between">{day.day} <span className="w-8 h-1 bg-slate-100 group-hover:bg-indigo-600 transition-all rounded-full" /></h3>
+                  <div className="space-y-3">
                     {day.items.map((item, i) => (
-                      <div key={i} className="flex flex-col gap-1 p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-white hover:shadow-md transition-all">
-                        <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.15em]">{item.time}</span>
+                      <div key={i} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 group-hover:bg-white group-hover:shadow-md transition-all">
+                        <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest block mb-1">{item.time}</span>
                         <p className="text-sm font-bold text-slate-800 leading-tight">{item.name}</p>
                       </div>
                     ))}
@@ -310,62 +320,54 @@ export default function CalendarPage() {
           )}
 
           {activeTab === 'exams' && (
-            <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead className="bg-slate-50/50 border-b border-slate-100">
-                    <tr>
-                      <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-slate-400">Fecha</th>
-                      <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-slate-400">Examen</th>
-                      <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-slate-400">Cuenta Regresiva</th>
-                      <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-slate-400">Estado</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {EXAMS.sort((a,b) => a.date.getTime() - b.date.getTime()).map((e, idx) => {
-                      const isPast = isAfter(today, e.date) && !isSameDay(today, e.date);
-                      const isExamToday = isSameDay(today, e.date);
-                      const daysLeft = differenceInDays(e.date, today);
-                      
-                      return (
-                        <tr key={idx} className={cn("hover:bg-slate-50/50 transition-colors group", isPast && "opacity-40")}>
-                          <td className="px-8 py-5">
-                            <div className="flex flex-col">
-                              <span className="text-sm font-black text-slate-800">{format(e.date, 'dd MMM', { locale: es })}</span>
-                              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{format(e.date, 'EEEE', { locale: es })}</span>
-                            </div>
-                          </td>
-                          <td className="px-8 py-5">
-                            <p className="text-sm font-black text-indigo-950">{e.name}</p>
-                            <p className="text-xs text-slate-400 font-bold uppercase tracking-tighter mt-0.5">{e.subject}</p>
-                          </td>
-                          <td className="px-8 py-5">
-                            {isPast ? (
-                              <span className="text-xs font-bold text-slate-300">-</span>
-                            ) : (
-                              <div className={cn(
-                                "flex items-center gap-2 text-xs font-black px-4 py-2 rounded-2xl border w-fit",
-                                isExamToday ? "bg-rose-600 text-white border-rose-600" : 
-                                daysLeft <= 7 ? "bg-amber-50 text-amber-600 border-amber-100" : "bg-indigo-50 text-indigo-600 border-indigo-100"
+            <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+              <table className="w-full text-left">
+                <thead className="bg-slate-50/50 border-b border-slate-100">
+                  <tr>
+                    <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-slate-400">Examen</th>
+                    <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-slate-400">Fecha</th>
+                    <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-slate-400">Sync</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {EXAMS.sort((a,b) => a.date.getTime() - b.date.getTime()).map((e, idx) => {
+                    const isPast = isAfter(today, e.date) && !isSameDay(today, e.date);
+                    const daysLeft = differenceInDays(e.date, today);
+                    return (
+                      <tr key={idx} className={cn("hover:bg-slate-50/50 transition-colors", isPast && "opacity-40")}>
+                        <td className="px-8 py-5">
+                          <p className="text-sm font-black text-indigo-950 leading-tight">{e.name}</p>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{e.subject}</p>
+                        </td>
+                        <td className="px-8 py-5">
+                          <div className="flex flex-col">
+                            <span className="text-sm font-black text-slate-800">{format(e.date, 'dd MMM', { locale: es })}</span>
+                            {!isPast && (
+                              <span className={cn(
+                                "text-[9px] font-black uppercase px-2 py-0.5 rounded-full w-fit mt-1",
+                                daysLeft <= 7 ? "bg-rose-100 text-rose-600" : "bg-indigo-100 text-indigo-600"
                               )}>
-                                {isExamToday ? "¡ES HOY!" : `Faltan ${daysLeft} días`}
-                              </div>
+                                {daysLeft === 0 ? "¡Hoy!" : `Faltan ${daysLeft} días`}
+                              </span>
                             )}
-                          </td>
-                          <td className="px-8 py-5">
-                            <span className={cn(
-                              "text-[10px] font-black px-3 py-1.5 rounded-xl uppercase tracking-widest",
-                              isPast ? "bg-slate-100 text-slate-400" : isExamToday ? "bg-rose-100 text-rose-600" : "bg-emerald-100 text-emerald-600"
-                            )}>
-                              {isPast ? "Rendido" : isExamToday ? "Hoy" : "Pendiente"}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+                          </div>
+                        </td>
+                        <td className="px-8 py-5">
+                          {!isPast && (
+                            <a 
+                              href={getGoogleCalendarLink(e)} 
+                              target="_blank" 
+                              className="inline-flex items-center gap-2 text-[10px] font-black text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-xl border border-indigo-100 transition-all"
+                            >
+                              <Plus size={14} /> GOOGLE
+                            </a>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
 
@@ -375,21 +377,25 @@ export default function CalendarPage() {
                 const isPast = isAfter(today, r.date) && !isSameDay(today, r.date);
                 return (
                   <div key={idx} className={cn(
-                    "bg-white p-6 rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 flex gap-6 group hover:border-amber-200 transition-all",
+                    "bg-white p-6 rounded-3xl shadow-xl border border-slate-100 flex gap-6 group transition-all",
                     isPast && "opacity-50"
                   )}>
-                    <div className="flex flex-col items-center justify-center bg-amber-50 text-amber-600 w-20 h-20 rounded-[2rem] shrink-0 border border-amber-100 group-hover:scale-105 transition-transform">
-                      <span className="text-xl font-black leading-none">{format(r.date, 'dd')}</span>
-                      <span className="text-[10px] font-black uppercase tracking-tighter">{format(r.date, 'MMM')}</span>
+                    <div className="flex flex-col items-center justify-center bg-amber-50 text-amber-600 w-16 h-16 rounded-2xl shrink-0 border border-amber-100 group-hover:scale-105 transition-transform">
+                      <span className="text-lg font-black leading-none">{format(r.date, 'dd')}</span>
+                      <span className="text-[9px] font-black uppercase">{format(r.date, 'MMM')}</span>
                     </div>
-                    <div className="flex-1 space-y-3">
+                    <div className="flex-1 space-y-2">
                       <div className="flex justify-between items-start">
-                        <h3 className="font-black text-indigo-950 text-lg leading-tight">{r.name}</h3>
-                        {!isPast && <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-100">{r.time}</span>}
+                        <h3 className="font-black text-indigo-950 text-base">{r.name}</h3>
+                        {!isPast && (
+                          <a href={getGoogleCalendarLink(r)} target="_blank" className="p-1.5 bg-slate-50 text-indigo-400 rounded-lg hover:bg-indigo-600 hover:text-white transition-all">
+                            <Share2 size={14} />
+                          </a>
+                        )}
                       </div>
-                      <div className="grid grid-cols-1 gap-2">
-                        <div className="flex items-center gap-2 text-xs font-bold text-slate-500"><MapPin size={14} className="text-amber-500" /> {r.place}</div>
-                        <div className="flex items-center gap-2 text-xs font-bold text-slate-500"><User size={14} className="text-indigo-400" /> {r.docent}</div>
+                      <div className="space-y-1 text-[11px] font-bold text-slate-400">
+                        <div className="flex items-center gap-1.5"><MapPin size={12} className="text-amber-500" /> {r.place}</div>
+                        <div className="flex items-center gap-1.5"><Clock size={12} className="text-indigo-400" /> {r.time}</div>
                       </div>
                     </div>
                   </div>
@@ -400,10 +406,15 @@ export default function CalendarPage() {
 
         </div>
       </div>
-
-      {/* Footer / Brand */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-md px-6 py-3 rounded-full border border-slate-200 shadow-lg z-50">
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">IUNIR Medicina • 5to Año • 2026</p>
+      
+      {/* Footer Branded */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white shadow-2xl border border-slate-200 px-8 py-3 rounded-full z-50 flex items-center gap-4 animate-in slide-in-from-bottom-10 duration-1000">
+        <div className="flex -space-x-2">
+          <div className="w-6 h-6 rounded-full bg-rose-500 border-2 border-white" />
+          <div className="w-6 h-6 rounded-full bg-amber-400 border-2 border-white" />
+          <div className="w-6 h-6 rounded-full bg-indigo-600 border-2 border-white" />
+        </div>
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">IUNIR MED 2026</p>
       </div>
     </div>
   );
