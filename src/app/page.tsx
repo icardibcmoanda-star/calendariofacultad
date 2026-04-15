@@ -33,7 +33,8 @@ import {
   AlertCircle,
   TrendingUp,
   Share2,
-  Plus
+  Plus,
+  Wrench
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -88,6 +89,13 @@ const ROTATIONS = [
   { date: new Date(2026, 4, 28), name: 'Reumatología 4', time: '08:00 - 10:00', docent: 'Milanesio Julieta', place: 'IJS (San Luis 2354)' },
 ];
 
+const WORKSHOPS = [
+  { date: new Date(2026, 4, 13), name: 'Taller de Neurología', type: 'Taller' },
+  { date: new Date(2026, 4, 13), name: 'Taller de Traumato', type: 'Taller' },
+  { date: new Date(2026, 4, 14), name: 'Taller de PAP', type: 'Taller' },
+  { date: new Date(2026, 5, 18), name: 'Taller de Parto', type: 'Taller' },
+];
+
 const EXAMS = [
   // Medicina Interna II
   { date: new Date(2026, 4, 13), name: '1° Parcial (Reumatología)', subject: 'Medicina Interna II' },
@@ -95,58 +103,35 @@ const EXAMS = [
   { date: new Date(2026, 6, 30), name: '3° Parcial (Toxicología)', subject: 'Medicina Interna II' },
   { date: new Date(2026, 7, 12), name: '4° Parcial (Med. Familiar)', subject: 'Medicina Interna II' },
   { date: new Date(2026, 9, 8), name: '5° Parcial (Med. Crítica)', subject: 'Medicina Interna II' },
-  
-  // Clínica Quirúrgica II
   { date: new Date(2026, 4, 8), name: '1° Parcial', subject: 'Clínica Quirúrgica II' },
   { date: new Date(2026, 5, 26), name: '2° Parcial', subject: 'Clínica Quirúrgica II' },
   { date: new Date(2026, 8, 11), name: '3° Parcial', subject: 'Clínica Quirúrgica II' },
   { date: new Date(2026, 10, 6), name: '4° Parcial', subject: 'Clínica Quirúrgica II' },
-
-  // PH V
   { date: new Date(2026, 4, 21), name: '1° Parcial', subject: 'PH V' },
   { date: new Date(2026, 5, 18), name: '2° Parcial', subject: 'PH V' },
-
-  // Praxis Médica y Legal
   { date: new Date(2026, 8, 15), name: '1° Parcial', subject: 'Praxis Médica y Legal' },
   { date: new Date(2026, 10, 10), name: '2° Parcial', subject: 'Praxis Médica y Legal' },
-
-  // Cibernética V
   { date: new Date(2026, 4, 15), name: '1° Parcial', subject: 'Cibernética V' },
   { date: new Date(2026, 5, 12), name: '2° Parcial', subject: 'Cibernética V' },
-
-  // Cirugía Básica V
   { date: new Date(2026, 5, 5), name: '1° Parcial', subject: 'Cirugía Básica V' },
   { date: new Date(2026, 9, 23), name: '2° Parcial', subject: 'Cirugía Básica V' },
-
-  // Inglés V
   { date: new Date(2026, 3, 29), name: '1° Parcial (A-B-C)', subject: 'Inglés V' },
   { date: new Date(2026, 7, 5), name: '2° Parcial (A-B-C)', subject: 'Inglés V' },
   { date: new Date(2026, 9, 28), name: '3° Parcial (A-B-C)', subject: 'Inglés V' },
-
-  // Italiano V
   { date: new Date(2026, 5, 16), name: '1° Parcial (A-B)', subject: 'Italiano V' },
   { date: new Date(2026, 9, 27), name: '2° Parcial (A-B)', subject: 'Italiano V' },
-
-  // Tocoginecología
   { date: new Date(2026, 4, 26), name: '1° Parcial', subject: 'Tocoginecología' },
   { date: new Date(2026, 6, 2), name: '2° Parcial', subject: 'Tocoginecología' },
   { date: new Date(2026, 8, 29), name: '3° Parcial', subject: 'Tocoginecología' },
-
-  // Pediatría y Neonatología
   { date: new Date(2026, 5, 2), name: '1° Parcial', subject: 'Pediatría y Neonatología' },
   { date: new Date(2026, 8, 9), name: '2° Parcial', subject: 'Pediatría y Neonatología' },
   { date: new Date(2026, 10, 3), name: '3° Parcial', subject: 'Pediatría y Neonatología' },
-
-  // Humanística V
   { date: new Date(2026, 4, 4), name: '1° Parcial', subject: 'Humanística V' },
   { date: new Date(2026, 5, 22), name: '2° Parcial', subject: 'Humanística V' },
-
-  // Diagnóstico por Imágenes V
   { date: new Date(2026, 5, 10), name: '1° Parcial', subject: 'Diagnóstico por Imágenes V' },
   { date: new Date(2026, 9, 21), name: '2° Parcial', subject: 'Diagnóstico por Imágenes V' },
 ];
 
-// Ayudante para generar links de Google Calendar
 const getGoogleCalendarLink = (event: any) => {
   const base = "https://calendar.google.com/calendar/render?action=TEMPLATE";
   const startStr = format(event.date, "yyyyMMdd");
@@ -158,7 +143,7 @@ const getGoogleCalendarLink = (event: any) => {
 };
 
 export default function CalendarPage() {
-  const [activeTab, setActiveTab] = useState<'calendar' | 'schedule' | 'exams' | 'rotations'>('calendar');
+  const [activeTab, setActiveTab] = useState<'calendar' | 'schedule' | 'exams' | 'rotations' | 'workshops'>('calendar');
   const [currentDate, setCurrentDate] = useState(new Date(2026, 3, 13));
   const [selectedDay, setSelectedDay] = useState<Date | null>(new Date());
 
@@ -188,16 +173,16 @@ export default function CalendarPage() {
             <h1 className="text-3xl font-black tracking-tight text-indigo-950 flex items-center gap-3">
               IUNIR <span className="text-indigo-600">MEDICINA</span>
             </h1>
-            <p className="text-slate-500 font-medium italic">Sincronizado con Google Calendar</p>
+            <p className="text-slate-500 font-medium italic tracking-wide uppercase text-[10px]">Gestión 5to Año • 2026</p>
           </div>
           
           {nextExam && (
-            <div className="flex items-center gap-4 bg-rose-600 text-white p-4 rounded-3xl shadow-lg shadow-rose-200 border-2 border-white/20">
+            <div className="flex items-center gap-4 bg-rose-600 text-white p-4 rounded-3xl shadow-xl shadow-rose-200 border-2 border-white/20">
               <div className="bg-white/20 p-2.5 rounded-2xl">
                 <AlertCircle size={24} />
               </div>
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest opacity-80 leading-none mb-1">Próximo Parcial</p>
+                <p className="text-[10px] font-black uppercase tracking-widest opacity-80 mb-1">Próximo Parcial</p>
                 <h4 className="font-bold text-sm leading-tight">{nextExam.name}</h4>
                 <p className="text-xs font-black bg-white/20 px-2 py-0.5 rounded-lg mt-1 inline-block">
                   {daysUntilNextExam === 0 ? "¡ES HOY! 🚀" : `Faltan ${daysUntilNextExam} días`}
@@ -208,12 +193,13 @@ export default function CalendarPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 p-1.5 bg-slate-200/50 rounded-2xl mb-8 w-fit overflow-x-auto no-scrollbar border border-slate-200/50">
+        <div className="flex gap-2 p-1.5 bg-slate-200/50 rounded-2xl mb-8 w-fit overflow-x-auto no-scrollbar border border-slate-200/50 shadow-inner">
           {[
             { id: 'calendar', label: 'Calendario', icon: CalendarIcon },
             { id: 'schedule', label: 'Horarios', icon: Clock },
             { id: 'exams', label: 'Parciales', icon: GraduationCap },
             { id: 'rotations', label: 'Rotaciones', icon: Stethoscope },
+            { id: 'workshops', label: 'Talleres', icon: Wrench },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -238,10 +224,10 @@ export default function CalendarPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               <div className="lg:col-span-8 bg-white rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 overflow-hidden">
                 <div className="p-6 flex items-center justify-between border-b border-slate-50 bg-slate-50/30">
-                  <h2 className="text-xl font-black capitalize text-slate-800">{format(currentDate, 'MMMM yyyy', { locale: es })}</h2>
+                  <h2 className="text-xl font-black capitalize text-slate-800 tracking-tight">{format(currentDate, 'MMMM yyyy', { locale: es })}</h2>
                   <div className="flex gap-2">
                     <button onClick={() => setCurrentDate(subMonths(currentDate, 1))} className="p-2.5 hover:bg-white rounded-xl text-slate-500 transition-all border border-transparent hover:border-slate-100"><ChevronLeft size={20}/></button>
-                    <button onClick={() => setCurrentDate(new Date(2026, 3, 13))} className="px-4 py-2 text-xs font-black uppercase tracking-widest hover:bg-white rounded-xl border border-transparent hover:border-slate-100">Hoy</button>
+                    <button onClick={() => setCurrentDate(new Date(2026, 3, 13))} className="px-4 py-2 text-xs font-black uppercase tracking-widest hover:bg-white rounded-xl">Hoy</button>
                     <button onClick={() => setCurrentDate(addMonths(currentDate, 1))} className="p-2.5 hover:bg-white rounded-xl text-slate-500 transition-all border border-transparent hover:border-slate-100"><ChevronRight size={20}/></button>
                   </div>
                 </div>
@@ -256,6 +242,7 @@ export default function CalendarPage() {
                     const isSel = selectedDay && isSameDay(day, selectedDay);
                     const dayExams = EXAMS.filter(e => isSameDay(e.date, day));
                     const dayRotations = ROTATIONS.filter(r => isSameDay(r.date, day));
+                    const dayWorkshops = WORKSHOPS.filter(w => isSameDay(w.date, day));
                     
                     return (
                       <div 
@@ -274,6 +261,7 @@ export default function CalendarPage() {
                         <div className="flex flex-wrap gap-1 mt-1">
                           {dayExams.map((_, idx) => <div key={idx} className="w-full h-1.5 rounded-full bg-rose-500 animate-pulse" />)}
                           {dayRotations.map((_, idx) => <div key={idx} className="w-full h-1.5 rounded-full bg-amber-400" />)}
+                          {dayWorkshops.map((_, idx) => <div key={idx} className="w-full h-1.5 rounded-full bg-emerald-500" />)}
                         </div>
                       </div>
                     );
@@ -282,24 +270,17 @@ export default function CalendarPage() {
               </div>
               
               <div className="lg:col-span-4 space-y-6">
-                <div className="bg-white p-6 rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100">
+                <div className="bg-white p-6 rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 sticky top-8">
                   <h3 className="text-lg font-black mb-6 text-indigo-950 flex items-center gap-2"><TrendingUp size={20} className="text-indigo-600" /> Agenda</h3>
                   {selectedDay ? (
-                    <div className="space-y-4">
-                      <p className="text-xs font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-lg w-fit">{format(selectedDay, "EEEE d 'de' MMMM", { locale: es })}</p>
+                    <div className="space-y-4 max-h-[500px] overflow-y-auto no-scrollbar">
+                      <p className="text-xs font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-lg w-fit mb-4">{format(selectedDay, "EEEE d 'de' MMMM", { locale: es })}</p>
                       
                       {EXAMS.filter(e => isSameDay(e.date, selectedDay)).map((e, idx) => (
-                        <div key={idx} className="p-4 bg-rose-50 border border-rose-100 rounded-2xl">
+                        <div key={idx} className="p-4 bg-rose-50 border border-rose-100 rounded-2xl mb-3">
                           <div className="flex justify-between items-start mb-2">
                             <span className="text-[10px] font-black uppercase text-rose-600 tracking-widest">Parcial</span>
-                            <a 
-                              href={getGoogleCalendarLink(e)} 
-                              target="_blank" 
-                              className="p-1.5 bg-white text-rose-600 rounded-lg shadow-sm border border-rose-100 hover:scale-110 transition-transform"
-                              title="Añadir a Google Calendar"
-                            >
-                              <Plus size={14} />
-                            </a>
+                            <a href={getGoogleCalendarLink(e)} target="_blank" className="p-1.5 bg-white text-rose-600 rounded-lg shadow-sm border border-rose-100 hover:scale-110 transition-transform"><Plus size={14} /></a>
                           </div>
                           <p className="font-bold text-rose-900 leading-tight">{e.name}</p>
                           <p className="text-[11px] text-rose-700/70 mt-1 font-bold">{e.subject}</p>
@@ -307,30 +288,36 @@ export default function CalendarPage() {
                       ))}
 
                       {ROTATIONS.filter(r => isSameDay(r.date, selectedDay)).map((r, idx) => (
-                        <div key={idx} className="p-4 bg-amber-50 border border-amber-100 rounded-2xl">
+                        <div key={idx} className="p-4 bg-amber-50 border border-amber-100 rounded-2xl mb-3">
                           <div className="flex justify-between items-start mb-2">
                             <span className="text-[10px] font-black uppercase text-amber-600 tracking-widest">Rotación</span>
-                            <a 
-                              href={getGoogleCalendarLink(r)} 
-                              target="_blank" 
-                              className="p-1.5 bg-white text-amber-600 rounded-lg shadow-sm border border-amber-100 hover:scale-110 transition-transform"
-                            >
-                              <Plus size={14} />
-                            </a>
+                            <a href={getGoogleCalendarLink(r)} target="_blank" className="p-1.5 bg-white text-amber-600 rounded-lg shadow-sm border border-amber-100 hover:scale-110 transition-transform"><Plus size={14} /></a>
                           </div>
                           <p className="font-bold text-amber-900 leading-tight">{r.name}</p>
-                          <div className="mt-2 space-y-1">
-                            <div className="flex items-center gap-2 text-[10px] font-bold text-amber-800/60"><Clock size={12}/> {r.time}</div>
-                            <div className="flex items-center gap-2 text-[10px] font-bold text-amber-800/60"><MapPin size={12}/> {r.place}</div>
+                          <div className="mt-2 space-y-1 text-[10px] font-bold text-amber-800/60">
+                            <div className="flex items-center gap-2"><Clock size={12}/> {r.time}</div>
+                            <div className="flex items-center gap-2"><MapPin size={12}/> {r.place}</div>
                           </div>
                         </div>
                       ))}
 
+                      {WORKSHOPS.filter(w => isSameDay(w.date, selectedDay)).map((w, idx) => (
+                        <div key={idx} className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl mb-3">
+                          <div className="flex justify-between items-start mb-2">
+                            <span className="text-[10px] font-black uppercase text-emerald-600 tracking-widest">Taller</span>
+                            <a href={getGoogleCalendarLink(w)} target="_blank" className="p-1.5 bg-white text-emerald-600 rounded-lg shadow-sm border border-emerald-100 hover:scale-110 transition-transform"><Plus size={14} /></a>
+                          </div>
+                          <p className="font-bold text-emerald-900 leading-tight">{w.name}</p>
+                          <p className="text-[11px] text-emerald-700/70 mt-1 font-bold italic">Asistencia requerida</p>
+                        </div>
+                      ))}
+
                       {EXAMS.filter(e => isSameDay(e.date, selectedDay)).length === 0 && 
-                       ROTATIONS.filter(r => isSameDay(r.date, selectedDay)).length === 0 && (
+                       ROTATIONS.filter(r => isSameDay(r.date, selectedDay)).length === 0 && 
+                       WORKSHOPS.filter(w => isSameDay(w.date, selectedDay)).length === 0 && (
                         <div className="py-12 flex flex-col items-center gap-2 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
                           <BookOpen className="text-slate-300" size={24} />
-                          <p className="text-xs text-slate-400 font-bold italic">Día libre de eventos</p>
+                          <p className="text-xs text-slate-400 font-bold italic">Sin eventos especiales</p>
                         </div>
                       )}
                     </div>
@@ -343,7 +330,7 @@ export default function CalendarPage() {
           {activeTab === 'schedule' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {WEEKLY_SCHEDULE.map((day, idx) => (
-                <div key={idx} className="bg-white p-6 rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 group">
+                <div key={idx} className="bg-white p-6 rounded-3xl shadow-xl shadow-slate-200/40 border border-slate-100 hover:border-indigo-200 transition-all group">
                   <h3 className="text-xl font-black text-slate-800 mb-6 flex items-center justify-between">{day.day} <span className="w-8 h-1 bg-slate-100 group-hover:bg-indigo-600 transition-all rounded-full" /></h3>
                   <div className="space-y-3">
                     {day.items.map((item, i) => (
@@ -361,47 +348,18 @@ export default function CalendarPage() {
           {activeTab === 'exams' && (
             <div className="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
               <table className="w-full text-left">
-                <thead className="bg-slate-50/50 border-b border-slate-100">
-                  <tr>
-                    <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-slate-400">Examen</th>
-                    <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-slate-400">Fecha</th>
-                    <th className="px-8 py-5 text-xs font-black uppercase tracking-widest text-slate-400">Sync</th>
-                  </tr>
+                <thead className="bg-slate-50/50 border-b border-slate-100 text-xs font-black uppercase tracking-widest text-slate-400">
+                  <tr><th className="px-8 py-5">Examen</th><th className="px-8 py-5">Fecha</th><th className="px-8 py-5">Sync</th></tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
                   {EXAMS.sort((a,b) => a.date.getTime() - b.date.getTime()).map((e, idx) => {
                     const isPast = isAfter(today, e.date) && !isSameDay(today, e.date);
-                    const daysLeft = differenceInDays(e.date, today);
+                    const dLeft = differenceInDays(e.date, today);
                     return (
                       <tr key={idx} className={cn("hover:bg-slate-50/50 transition-colors", isPast && "opacity-40")}>
-                        <td className="px-8 py-5">
-                          <p className="text-sm font-black text-indigo-950 leading-tight">{e.name}</p>
-                          <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{e.subject}</p>
-                        </td>
-                        <td className="px-8 py-5">
-                          <div className="flex flex-col">
-                            <span className="text-sm font-black text-slate-800">{format(e.date, 'dd MMM', { locale: es })}</span>
-                            {!isPast && (
-                              <span className={cn(
-                                "text-[9px] font-black uppercase px-2 py-0.5 rounded-full w-fit mt-1",
-                                daysLeft <= 7 ? "bg-rose-100 text-rose-600" : "bg-indigo-100 text-indigo-600"
-                              )}>
-                                {daysLeft === 0 ? "¡Hoy!" : `Faltan ${daysLeft} días`}
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-8 py-5">
-                          {!isPast && (
-                            <a 
-                              href={getGoogleCalendarLink(e)} 
-                              target="_blank" 
-                              className="inline-flex items-center gap-2 text-[10px] font-black text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-xl border border-indigo-100 transition-all"
-                            >
-                              <Plus size={14} /> GOOGLE
-                            </a>
-                          )}
-                        </td>
+                        <td className="px-8 py-5 text-sm font-black text-indigo-950">{e.name} <p className="text-[10px] text-slate-400 uppercase mt-1 tracking-tighter">{e.subject}</p></td>
+                        <td className="px-8 py-5 flex flex-col"><span className="text-sm font-black text-slate-800">{format(e.date, 'dd MMM', { locale: es })}</span>{!isPast && <span className={cn("text-[9px] font-black uppercase px-2 py-0.5 rounded-full w-fit mt-1", dLeft <= 7 ? "bg-rose-100 text-rose-600" : "bg-indigo-100 text-indigo-600")}>{dLeft === 0 ? "¡Hoy!" : `Faltan ${dLeft} días`}</span>}</td>
+                        <td className="px-8 py-5">{!isPast && <a href={getGoogleCalendarLink(e)} target="_blank" className="inline-flex items-center gap-2 text-[10px] font-black text-indigo-600 hover:bg-indigo-50 px-3 py-2 rounded-xl border border-indigo-100 transition-all"><Plus size={14} /> GOOGLE</a>}</td>
                       </tr>
                     );
                   })}
@@ -412,31 +370,34 @@ export default function CalendarPage() {
 
           {activeTab === 'rotations' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {ROTATIONS.sort((a,b) => a.date.getTime() - b.date.getTime()).map((r, idx) => {
-                const isPast = isAfter(today, r.date) && !isSameDay(today, r.date);
+              {ROTATIONS.sort((a,b) => a.date.getTime() - b.date.getTime()).map((r, idx) => (
+                <div key={idx} className={cn("bg-white p-6 rounded-3xl shadow-xl border border-slate-100 flex gap-6 group transition-all", isAfter(today, r.date) && !isSameDay(today, r.date) && "opacity-50")}>
+                  <div className="flex flex-col items-center justify-center bg-amber-50 text-amber-600 w-16 h-16 rounded-2xl shrink-0 border border-amber-100"><span className="text-lg font-black leading-none">{format(r.date, 'dd')}</span><span className="text-[9px] font-black uppercase">{format(r.date, 'MMM')}</span></div>
+                  <div className="flex-1 space-y-2"><div className="flex justify-between items-start"><h3 className="font-black text-indigo-950 text-base">{r.name}</h3><a href={getGoogleCalendarLink(r)} target="_blank" className="p-1.5 bg-slate-50 text-indigo-400 rounded-lg hover:bg-indigo-600 hover:text-white transition-all"><Share2 size={14} /></a></div><div className="space-y-1 text-[11px] font-bold text-slate-400"><div className="flex items-center gap-1.5"><MapPin size={12} className="text-amber-500" /> {r.place}</div><div className="flex items-center gap-1.5"><Clock size={12} className="text-indigo-400" /> {r.time}</div></div></div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {activeTab === 'workshops' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {WORKSHOPS.sort((a,b) => a.date.getTime() - b.date.getTime()).map((w, idx) => {
+                const isPast = isAfter(today, w.date) && !isSameDay(today, w.date);
                 return (
-                  <div key={idx} className={cn(
-                    "bg-white p-6 rounded-3xl shadow-xl border border-slate-100 flex gap-6 group transition-all",
-                    isPast && "opacity-50"
-                  )}>
-                    <div className="flex flex-col items-center justify-center bg-amber-50 text-amber-600 w-16 h-16 rounded-2xl shrink-0 border border-amber-100 group-hover:scale-105 transition-transform">
-                      <span className="text-lg font-black leading-none">{format(r.date, 'dd')}</span>
-                      <span className="text-[9px] font-black uppercase">{format(r.date, 'MMM')}</span>
+                  <div key={idx} className={cn("bg-white p-6 rounded-3xl shadow-xl border border-emerald-50 hover:border-emerald-200 transition-all flex flex-col gap-4", isPast && "opacity-40")}>
+                    <div className="flex justify-between items-center">
+                      <div className="bg-emerald-600 text-white px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest">TALLER</div>
+                      <span className="text-xs font-black text-slate-400">{format(w.date, 'dd MMMM', { locale: es })}</span>
                     </div>
-                    <div className="flex-1 space-y-2">
-                      <div className="flex justify-between items-start">
-                        <h3 className="font-black text-indigo-950 text-base">{r.name}</h3>
-                        {!isPast && (
-                          <a href={getGoogleCalendarLink(r)} target="_blank" className="p-1.5 bg-slate-50 text-indigo-400 rounded-lg hover:bg-indigo-600 hover:text-white transition-all">
-                            <Share2 size={14} />
-                          </a>
-                        )}
-                      </div>
-                      <div className="space-y-1 text-[11px] font-bold text-slate-400">
-                        <div className="flex items-center gap-1.5"><MapPin size={12} className="text-amber-500" /> {r.place}</div>
-                        <div className="flex items-center gap-1.5"><Clock size={12} className="text-indigo-400" /> {r.time}</div>
-                      </div>
+                    <div>
+                      <h3 className="text-lg font-black text-emerald-950">{w.name}</h3>
+                      <p className="text-xs text-slate-500 font-bold mt-1 uppercase tracking-tighter">Asistencia Presencial Obligatoria</p>
                     </div>
+                    {!isPast && (
+                      <a href={getGoogleCalendarLink(w)} target="_blank" className="mt-2 w-full flex items-center justify-center gap-2 bg-emerald-50 text-emerald-700 py-2.5 rounded-2xl font-black text-[10px] hover:bg-emerald-600 hover:text-white transition-all border border-emerald-100">
+                        <Plus size={16} /> AÑADIR A GOOGLE CALENDAR
+                      </a>
+                    )}
                   </div>
                 );
               })}
@@ -446,14 +407,14 @@ export default function CalendarPage() {
         </div>
       </div>
       
-      {/* Footer Branded */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white shadow-2xl border border-slate-200 px-8 py-3 rounded-full z-50 flex items-center gap-4 animate-in slide-in-from-bottom-10 duration-1000">
-        <div className="flex -space-x-2">
-          <div className="w-6 h-6 rounded-full bg-rose-500 border-2 border-white" />
-          <div className="w-6 h-6 rounded-full bg-amber-400 border-2 border-white" />
-          <div className="w-6 h-6 rounded-full bg-indigo-600 border-2 border-white" />
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md shadow-2xl border border-slate-200 px-8 py-3 rounded-full z-50 flex items-center gap-6 animate-in slide-in-from-bottom-10 duration-1000">
+        <div className="flex -space-x-3">
+          <div className="w-8 h-8 rounded-full bg-rose-500 border-4 border-white shadow-sm" />
+          <div className="w-8 h-8 rounded-full bg-amber-400 border-4 border-white shadow-sm" />
+          <div className="w-8 h-8 rounded-full bg-emerald-500 border-4 border-white shadow-sm" />
+          <div className="w-8 h-8 rounded-full bg-indigo-600 border-4 border-white shadow-sm" />
         </div>
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">IUNIR MED 2026</p>
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">IUNIR MED 5TO • 2026</p>
       </div>
     </div>
   );
